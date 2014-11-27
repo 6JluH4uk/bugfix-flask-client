@@ -16,7 +16,7 @@ setup(
     long_description = long_desc,
     author = 'blinchik',
     author_email = 'prohorenko_gena_@mail.ru',
-    download_url = '',
+    download_url = 'https://github.com/6JluH4uk/bugfix-client/archive/master.zip',
     url = github_url,
     include_package_data = True,
     license = 'MIT License',

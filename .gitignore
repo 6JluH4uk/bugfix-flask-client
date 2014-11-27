@@ -1,0 +1,7 @@
+*.pyc
+*.orig
+*.log
+*.swp
+*.elc
+*.swo
+*.pid
