@@ -1,9 +1,10 @@
 #-*- coding:utf-8 -*- 
 
+import json
+import datetime
 from django.db import models
-import json, datetime
 from django.contrib.sites.models import Site
-from gh.settings import BUGFIX_URL
+from django.conf import settings
 
 class JsonManager(models.Manager):
     def get_json(self):
@@ -55,9 +56,10 @@ class BugFix(models.Model):
 
     def save(self, *args, **kwargs):
         super(BugFix, self).save(*args, **kwargs)
-        import urllib, urllib2
-        data = urllib.urlencode({'json': BugFix.objects.get_json()})
-        urllib2.urlopen(BUGFIX_URL, data)
+        if hasattr(settings, 'BUGFIX_URL'):
+            import urllib, urllib2
+            data = urllib.urlencode({'json': BugFix.objects.get_json()})
+            urllib2.urlopen(settings.BUGFIX_URL, data)
 
     def __unicode__(self):
         return self.name
