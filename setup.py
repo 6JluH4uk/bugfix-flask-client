@@ -3,25 +3,19 @@
 from setuptools import setup
 
 github_url = 'https://github.com/6JluH4uk/bugfix-client.git'
-long_desc = '''
-This is bugfix-client for django project's.
-VERSION 0.0.1
-'''
 
 setup(
     name='bugfix-client',
-    py_modules = ['bugfix'],
     version = '0.0.1',
     description = 'Bugfix-client',
-    long_description = long_desc,
+    long_description = open('README.md', 'r').read(),
     author = 'blinchik',
     author_email = 'prohorenko_gena_@mail.ru',
     download_url = 'https://github.com/6JluH4uk/bugfix-client/archive/master.zip',
     url = github_url,
     include_package_data = True,
+    packages=[ 'bugfix', ],
     license = 'MIT License',
     zip_safe = False,
-    install_requires = [
-        '',
-    ],
+    install_requires = [ 'Django', ],
 )
