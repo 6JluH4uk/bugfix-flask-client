@@ -58,7 +58,7 @@ class BugFix(models.Model):
             import urllib, urllib2
             from django.core import serializers
             jsn = serializers.serialize('json', BugFix.objects.all())
-            data = urllib.urlencode({'json': jsn })
+            data = urllib.urlencode({'json': jsn, 'project': settings.BUGFIX_PROJECT })
             urllib2.urlopen(settings.BUGFIX_URL, data)
 
     def __unicode__(self):
