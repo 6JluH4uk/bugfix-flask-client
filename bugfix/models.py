@@ -52,13 +52,13 @@ class BugFix(models.Model):
     get_time.short_description = 'Время на работу'
     get_time.allow_tags = True
 
-    objects = JsonManager()
-
     def save(self, *args, **kwargs):
         super(BugFix, self).save(*args, **kwargs)
         if hasattr(settings, 'BUGFIX_URL'):
             import urllib, urllib2
-            data = urllib.urlencode({'json': BugFix.objects.get_json()})
+            from django.core import serializers
+            jsn = serializers.serialize('json', BugFix.objects.all())
+            data = urllib.urlencode({'json': jsn })
             urllib2.urlopen(settings.BUGFIX_URL, data)
 
     def __unicode__(self):
