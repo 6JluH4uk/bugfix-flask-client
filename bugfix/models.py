@@ -41,7 +41,10 @@ class BugFix(models.Model):
             data = [bug.to_dict() for bug in BugFix.objects.all()]
             jsn = json.dumps(data, default=json_util.default)
             data = urllib.urlencode({'json': jsn, 'project': settings.BUGFIX_PROJECT })
-            urllib2.urlopen(settings.BUGFIX_URL, data)
+            try:
+                urllib2.urlopen(settings.BUGFIX_URL, data)
+            except:
+                pass
 
     def __unicode__(self):
         return self.name
