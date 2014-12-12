@@ -1,33 +1,7 @@
 #-*- coding:utf-8 -*- 
 
-import json
-import datetime
 from django.db import models
-from django.contrib.sites.models import Site
 from django.conf import settings
-
-class JsonManager(models.Manager):
-    def get_json(self):
-        myobjects =  super(JsonManager, self).get_query_set()
-        bugjson = []
-        for o in myobjects:
-            name= o.name
-            text = o.text.replace("'", "\'").replace('"', '\"')
-            date = datetime.date.today()
-            if o.date:
-                date= o.date.strftime("%d-%m-%Y")
-            else:
-                date = u'Без даты'
-            if o.createdate != '':
-                createdate = o.createdate.strftime("%d-%m-%Y")
-            else:
-                createdate = u'Без даты'
-            status = o.get_status_display()
-            project = str(Site.objects.all()[0].name)
-            bug_id = str(o.id)
-            bugjson.append({'name':name, 'text':text, 'date':date, 'createdate':createdate, 'status':status, 'project':project, 'project_bug_id':bug_id})
-        return json.dumps(bugjson)
-
 
 class BugFix(models.Model):
     name = models.CharField(verbose_name = u'Название задачи', max_length = 1000, help_text = u'Уникальное название задачи для ее быстрой идентификации')
@@ -42,6 +16,13 @@ class BugFix(models.Model):
     timefj = models.TimeField( verbose_name = u'Время на работу', blank = True, null = True, help_text = u'Выберите время затраченное на работу', default = '00:00:00')
     createdate = models.DateTimeField(verbose_name = u'Дата создания', auto_now_add = True)
 
+    def to_dict(self):
+        return {'name':       self.name,
+                'text':       self.text,
+                'date':       self.date,
+                'status':     self.status,
+                'createdate': self.createdate}
+
     def get_text(self):
         return self.text
     get_text.short_description = 'Описание'
@@ -55,9 +36,10 @@ class BugFix(models.Model):
     def save(self, *args, **kwargs):
         super(BugFix, self).save(*args, **kwargs)
         if hasattr(settings, 'BUGFIX_URL'):
-            import urllib, urllib2
-            from django.core import serializers
-            jsn = serializers.serialize('json', BugFix.objects.all())
+            import urllib, urllib2, json
+            from bson import json_util
+            data = [bug.to_dict() for bug in BugFix.objects.all()]
+            jsn = json.dumps(data, default=json_util.default)
             data = urllib.urlencode({'json': jsn, 'project': settings.BUGFIX_PROJECT })
             urllib2.urlopen(settings.BUGFIX_URL, data)
 
