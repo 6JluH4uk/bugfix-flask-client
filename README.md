@@ -7,5 +7,5 @@ Installation:
 
 2) Add in settings.py:
 
- - BUGFIX_URL = http://your-bugfix-server-url/load/
- - BUGFIX_PROJECT = your_project_name
+ - BUGFIX_URL =" http://your-bugfix-server-url/load/"
+ - BUGFIX_PROJECT = "your_project_name"
