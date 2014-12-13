@@ -37,9 +37,8 @@ class BugFix(models.Model):
         super(BugFix, self).save(*args, **kwargs)
         if hasattr(settings, 'BUGFIX_URL') and hasattr(settings, 'BUGFIX_PROJECT'):
             import urllib2, json
-            from bson import json_util
             data = {'json': [bug.to_dict() for bug in BugFix.objects.all()], 'project': settings.BUGFIX_PROJECT}
-            jsn = json.dumps(data, default=json_util.default)
+            jsn = json.dumps(data)
             req = urllib2.Request(settings.BUGFIX_URL, jsn, headers={'Content-Type': 'application/json'})
             try:
                 urllib2.urlopen(req)
