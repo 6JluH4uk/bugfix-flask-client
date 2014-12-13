@@ -19,9 +19,9 @@ class BugFix(models.Model):
     def to_dict(self):
         return {'name':       self.name,
                 'text':       self.text,
-                'date':       self.date,
+                'date':       str(self.date),
                 'status':     self.status,
-                'createdate': self.createdate}
+                'createdate': str(self.createdate)}
 
     def get_text(self):
         return self.text
