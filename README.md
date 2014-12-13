@@ -6,8 +6,11 @@ Installation:
 1) pip install git+https://github.com/6JluH4uk/bugfix-client.git
 
 2) Add to 'INSTALLED_APPS':
+
     ...
+
     'bugfix',
+
     ...
 
 3) Add in settings.py:
