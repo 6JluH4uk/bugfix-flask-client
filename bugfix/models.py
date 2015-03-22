@@ -1,20 +1,20 @@
-#-*- coding:utf-8 -*- 
+#-*- coding:utf-8 -*-
 
-from django.db import models
-from django.conf import settings
+import config
+from app.database import db
+from sqlalchemy import event
 
-class BugFix(models.Model):
-    name = models.CharField(verbose_name = u'Название задачи', max_length = 1000, help_text = u'Уникальное название задачи для ее быстрой идентификации')
-    text = models.TextField(verbose_name = u'Описание', blank = True, null = True, help_text = u'Подробное описание задачи')
-    date = models.DateField(verbose_name = u'Срок', null = True, blank = True, help_text = u'К какому числу задача должна быть выполнена')
-    choices = ((u'0', u'Поставлена'),
-               (u'1', u'Проверка'),
-               (u'2', u'Отменена'),
-               (u'3', u'Выполнена'),
-               (u'4', u'Удалена'), )
-    status = models.CharField(verbose_name = u'Статус', max_length = 255, blank = True, choices = choices, help_text = u'Статус задачи')
-    timefj = models.TimeField( verbose_name = u'Время на работу', blank = True, null = True, help_text = u'Выберите время затраченное на работу', default = '00:00:00')
-    createdate = models.DateField(verbose_name = u'Дата создания', auto_now_add = True)
+class BugFix(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(1023))
+    text = db.Column(db.Text)
+    date = db.Column(db.Date)
+    status = db.Column(db.String(1))
+    timefj = db.Column(db.Time)
+    createdate = db.Column(db.DateTime, default=db.func.now())
+
+    def __repr__(self):
+        return self.id
 
     def to_dict(self):
         return {'name':       self.name,
@@ -23,31 +23,15 @@ class BugFix(models.Model):
                 'status':     self.status,
                 'createdate': str(self.createdate)}
 
-    def get_text(self):
-        return self.text
-    get_text.short_description = 'Описание'
-    get_text.allow_tags = True
-
-    def get_time(self):
-        return self.timefj.strftime('%H:%M')
-    get_time.short_description = 'Время на работу'
-    get_time.allow_tags = True
-
-    def save(self, *args, **kwargs):
-        super(BugFix, self).save(*args, **kwargs)
-        if hasattr(settings, 'BUGFIX_URL') and hasattr(settings, 'BUGFIX_PROJECT'):
-            import urllib2, json
-            data = {'json': [bug.to_dict() for bug in BugFix.objects.all()], 'project': settings.BUGFIX_PROJECT}
-            jsn = json.dumps(data)
-            req = urllib2.Request(settings.BUGFIX_URL, jsn, headers={'Content-Type': 'application/json'})
-            try:
-                urllib2.urlopen(req)
-            except:
-                pass
-
-    def __unicode__(self):
-        return self.name
-
-    class Meta:
-        verbose_name_plural = u"Задачи"
-        verbose_name = u"Задачу"
+@event.listens_for(BugFix, 'after_insert')
+@event.listens_for(BugFix, 'after_update')
+def send_bugs(mapper, connection, target):
+    if hasattr(config, 'BUGFIX_URL') and hasattr(config, 'BUGFIX_PROJECT'):
+        import urllib2, json
+        data = {'json': [bug.to_dict() for bug in BugFix.query.all()], 'project': config.BUGFIX_PROJECT}
+        jsn = json.dumps(data)
+        req = urllib2.Request(config.BUGFIX_URL, jsn, headers={'Content-Type': 'application/json'})
+        try:
+            urllib2.urlopen(req)
+        except:
+            pass
